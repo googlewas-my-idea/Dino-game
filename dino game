@@ -1,0 +1,87 @@
+import pygame
+import random
+import sys
+
+# Initialize Pygame
+pygame.init()
+
+# Constants
+WIDTH, HEIGHT = 600, 200
+FPS = 60
+GROUND_HEIGHT = 20
+DINO_WIDTH, DINO_HEIGHT = 50, 50
+CACTUS_WIDTH, CACTUS_HEIGHT = 20, 50
+JUMP_HEIGHT = 2 * DINO_HEIGHT
+
+# Colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+
+# Set up the game window
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Dino Game")
+
+# Load images
+dino_img = pygame.image.load("dino.png")  # Replace with the path to your dino image
+cactus_img = pygame.image.load("cactus.png")  # Replace with the path to your cactus image
+
+# Set up clock
+clock = pygame.time.Clock()
+
+# Game variables
+dino_x = 50
+dino_y = HEIGHT - GROUND_HEIGHT - DINO_HEIGHT
+dino_jump = False
+dino_jump_count = 10
+cactus_x = WIDTH
+cactus_y = HEIGHT - GROUND_HEIGHT - CACTUS_HEIGHT
+cactus_speed = 5
+
+# Game loop
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and not dino_jump:
+            dino_jump = True
+
+    # Update
+    cactus_x -= cactus_speed
+    if cactus_x < 0:
+        cactus_x = WIDTH
+        cactus_y = HEIGHT - GROUND_HEIGHT - CACTUS_HEIGHT
+
+    if dino_jump:
+        if dino_jump_count >= -10:
+            neg = 1
+            if dino_jump_count < 0:
+                neg = -1
+            dino_y -= (dino_jump_count ** 2) * 0.5 * neg
+            dino_jump_count -= 1
+        else:
+            dino_jump = False
+            dino_jump_count = 10
+
+    # Collision detection
+    if (
+        dino_x < cactus_x + CACTUS_WIDTH
+        and dino_x + DINO_WIDTH > cactus_x
+        and dino_y < cactus_y + CACTUS_HEIGHT
+        and dino_y + DINO_HEIGHT > cactus_y
+    ):
+        print("Game Over!")
+        pygame.quit()
+        sys.exit()
+
+    # Draw
+    screen.fill(WHITE)
+    pygame.draw.rect(screen, BLACK, (0, HEIGHT - GROUND_HEIGHT, WIDTH, GROUND_HEIGHT))
+
+    screen.blit(dino_img, (dino_x, dino_y))
+    screen.blit(cactus_img, (cactus_x, cactus_y))
+
+    pygame.display.flip()
+
+    # Set the frames per second
+    clock.tick(FPS)
